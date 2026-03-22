@@ -1253,7 +1253,7 @@ def render_task(problem: str, task_no: int) -> None:
                 placeholder="Summarize the AI response...",
             )
 
-    with st.expander("Step 3. Evaluate the Response and Decide What to Do Next", expanded=False):
+    with st.expander("Step 3. Decide What to Do Next", expanded=False):
         st.radio(
             "After receiving a response, do not accept it automatically. Instead, evaluate it carefully and decide how useful or reliable it is for your current task. Then decide what you will do next. The goal is to make an intentional decision rather than following the response automatically. You may choose to:",
             DECISION_OPTIONS,
