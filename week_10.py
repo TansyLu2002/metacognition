@@ -50,7 +50,7 @@ st.markdown(
         margin-bottom: 18px;
         box-shadow: 0 4px 14px rgba(0,0,0,0.04);
     }
-    
+
     .second-note-box {
     background: linear-gradient(135deg, #eef8ff 0%, #f7fbff 100%);
     border: 1px solid #93c5fd;
@@ -124,7 +124,7 @@ st.markdown(
         margin-top: 16px;
         margin-bottom: 16px;
     }
-    
+
     .notice-box {
     background: linear-gradient(135deg, #fff7ed 0%, #fffaf3 100%);
     border: 1px solid #fdba74;
@@ -255,7 +255,7 @@ st.markdown(
         line-height: 1.6;
         font-size: 0.95rem;
     }
-    
+
     .role-example-box {
     background: linear-gradient(135deg, #f5f3ff 0%, #faf7ff 100%);
     border: 1px solid #c4b5fd;
@@ -690,7 +690,7 @@ A useful starting point is to define:
 Your goal in this step is to clarify the mathematical structure of the problem.
 """,
         "step2": """
-If you use AI at this stage, the prompt should focus on mathematical modelling rather than coding. For example, you may ask AI to help express arbitrage as an optimisation or graph-based problem, explain possible variables and constraints, or clarify how profit should be represented mathematically.
+If you use AI at this stage,  you may ask AI to help express arbitrage as an optimisation or graph-based problem, explain possible variables and constraints, or clarify how profit should be represented mathematically.
 
 Read the response carefully and keep only what is useful for building your own model.
 """,
@@ -821,6 +821,7 @@ ARBITRAGE_TASK_TITLES = {
     4: "Task 4: Check and Validate the Result",
     5: "Task 5: Interpret and Present the Solution",
 }
+
 
 # --------------------------
 # Helpers
@@ -1044,6 +1045,7 @@ def export_dataframe() -> pd.DataFrame:
 
     return pd.DataFrame(rows)
 
+
 # --------------------------
 # Render sections
 # --------------------------
@@ -1057,22 +1059,22 @@ def render_plan(problem: str) -> None:
             st.markdown(get_plan_hint_text(problem))
 
         with st.expander("A2. My Role and AI's Role", expanded=True):
-                st.markdown(
-                    """
-    Before using AI, think about how you want to share the work across the process.
+            st.markdown(
+                """
+Before using AI, think about how you want to share the work across the process.
 
-    - What should I be responsible for?
-    - What can AI help with?
-    - Why does this division make sense for this problem?
-    """
-                )
+- What should I be responsible for?
+- What can AI help with?
+- Why does this division make sense for this problem?
+"""
+            )
 
-                st.text_area(
-                    "My role and AI's role",
-                    key=f"{p}_a2_role_ai_role",
-                    height=180,
-                    placeholder="Write here...",
-                )
+            st.text_area(
+                "My role and AI's role",
+                key=f"{p}_a2_role_ai_role",
+                height=180,
+                placeholder="Write here...",
+            )
 
     else:
         with st.expander("A1. Task Decomposition", expanded=True):
@@ -1145,6 +1147,9 @@ def render_task(problem: str, task_no: int) -> None:
 
     st.subheader(task_header)
 
+    # --------------------------
+    # Step 1
+    # --------------------------
     with st.expander("Step 1. Define This Task", expanded=True):
         if problem == "Arbitrage":
             st.markdown(ARBITRAGE_STEP_TEXT[task_no]["step1"])
@@ -1153,7 +1158,7 @@ def render_task(problem: str, task_no: int) -> None:
                 """Focus on this task from your own plan. Before using AI, first make clear what you are trying to do in this task and why it matters for solving the larger problem."""
             )
             st.markdown(
-                """> **Questions:**  
+                """> **Questions to think about:**  
 > What is my current task goal?  
 > Why does this task matter for the larger problem?  
 > What do I already think before using AI, and what am I still unsure about?"""
@@ -1164,7 +1169,9 @@ def render_task(problem: str, task_no: int) -> None:
                 height=220,
                 placeholder="Define this task clearly here...",
             )
-
+    # --------------------------
+    # Hint section (Hawker only)
+    # --------------------------
     if problem != "Arbitrage":
         with st.expander(f"Do you need hints for Task {task_no}?", expanded=False):
             st.radio(
@@ -1175,134 +1182,62 @@ def render_task(problem: str, task_no: int) -> None:
             )
             if st.session_state.get(f"{prefix}_need_hint", "No") == "Yes":
                 st.info(get_task_hint_text(problem, task_no))
-                st.text_area(
-                    "Hint notes",
-                    key=f"{prefix}_hint_notes",
-                    height=120,
-                    placeholder="Write any useful notes from the hint here...",
-                )
 
-    with st.expander("Step 2. Prompt AI and Evaluate the Response", expanded=False):
+
+    # --------------------------
+    # Step 2 (prompt only, no input)
+    # --------------------------
+    with st.expander("Step 2. Prompt AI", expanded=False):
         if problem == "Arbitrage":
             st.markdown(ARBITRAGE_STEP_TEXT[task_no]["step2"])
-            st.text_area(
-                "Write a prompt to AI for this specific task, and briefly note how you evaluated the response.",
-                key=f"{prefix}_step2_prompt_eval",
-                height=180,
-                placeholder="Summarize how useful the AI response was...",
+            st.markdown(
+                """
+Do not ask AI to do the whole problem automatically.  
+"""
             )
         else:
-            st.text_area(
-                "Write a prompt to AI for this specific task.",
-                key=f"{prefix}_step2_prompt_eval",
-                height=180,
-                placeholder="Summarize the AI response...",
+            st.markdown(
+                """
+Your prompt should be specific to your current subtask.  
+Do not ask AI to solve everything at once.
+"""
             )
 
-    with st.expander("Step 3. Decide What to Do Next", expanded=False):
-        st.radio(
-            "After receiving a response, do not accept it automatically. Instead, evaluate it carefully and decide how useful or reliable it is for your current task. Then decide what you will do next. The goal is to make an intentional decision rather than following the response automatically. You may choose to:",
-            DECISION_OPTIONS,
-            key=f"{prefix}_step3_decision",
+        # --------------------------
+        # Step 3 (merged instruction only)
+        # --------------------------
+    with st.expander("Step 3. Continue Working on This Task", expanded=False):
+        st.markdown(
+            """
+    #### Evaluate AI Prompt
+
+    After you receive the AI response, think about:
+
+    - whether it is clear and relevant?
+    - whether it gives the kind of support you actually need?
+    - Any revision needed?
+
+    #### Implementation
+
+    At this stage, continue your work by implementing the code in Jupyter Notebook.
+
+    #### Evaluate the Solution and Interpretation
+
+    After testing, think about:
+
+    - What does this result show?
+    - Does it actually answer the current task?
+    - Any revision needed?
+
+    #### Save the Task
+
+    Continue your work carefully, then click **Save task** when you are ready to move on.
+    """
         )
 
-    with st.expander("Step 4. Implement, Test, and Interpret", expanded=False):
-            if problem == "Arbitrage":
-                st.markdown(ARBITRAGE_STEP_TEXT[task_no]["step4"])
-                st.markdown(
-                    """> **Questions:**   
-    > What result(s) did I observe?  
-    > What should I do next?"""
-                )
-                st.text_area(
-                    "Write here:",
-                    key=f"{prefix}_step4_implement_test_interpret",
-                    height=220,
-                    placeholder="Describe what you implemented, tested, observed, and how you interpreted the result...",
-                )
-            else:
-                st.markdown(
-                    """Now apply the idea, method, or response that you decided to use. Record what you tested, what you expected, what actually happened, and what the result means for this task."""
-                )
-                st.markdown(
-                    """> **Questions:**  
-    > What result(s) did I observe?  
-    > What should I do next?"""
-                )
-                st.text_area(
-                    "Write here:",
-                    key=f"{prefix}_step4_implement_test_interpret",
-                    height=220,
-                    placeholder="Describe implementation, observed results, and interpretation...",
-                )
-
-    with st.expander(
-        "Based on my evaluation of the result, do I need to revise this task from the beginning?",
-        expanded=False,
-    ):
-        if problem == "Arbitrage":
-            st.markdown(
-                "Use your evaluation to decide whether you should continue as planned or go back and revise an earlier part of the task."
-            )
-        else:
-            st.radio(
-                "Do I need to revise this task from the beginning?",
-                YES_NO_OPTIONS,
-                key=f"{prefix}_revise_from_beginning",
-                horizontal=True,
-            )
-
-    if problem == "Arbitrage":
-        with st.expander("Step 5. Revise if Needed", expanded=False):
-            st.markdown(ARBITRAGE_STEP_TEXT[task_no]["step5"])
-    elif st.session_state.get(f"{prefix}_revise_from_beginning", "No") == "Yes":
-        with st.expander("Step 5. Revise if Needed", expanded=True):
-            st.markdown(
-                """If the response, method, or result was not fully satisfactory, revise your prompt or your approach and try again. Use this step to explain what you changed and what happened after the revision."""
-            )
-            st.markdown(
-                """> **Questions:**  
-> What did I change in my prompt or approach, and why?  
-> What happened after the revision or second test?"""
-            )
-            st.text_area(
-                "Write here:",
-                key=f"{prefix}_step5_revise",
-                height=220,
-                placeholder="Write revisions here...",
-            )
-    with st.expander("Step 6. Reflect on This Task", expanded=False):
-            if problem == "Arbitrage":
-                st.markdown(ARBITRAGE_STEP_TEXT[task_no]["step6"])
-                st.markdown(
-                    """> **Questions:**  
-    > What did I learn about the problem from this task?  
-    > What did I learn about using AI from this task?  
-    > What would I do differently in the next task?"""
-                )
-                st.text_area(
-                    "Write here:",
-                    key=f"{prefix}_step6_reflect",
-                    height=220,
-                    placeholder="Write your reflection here...",
-                )
-            else:
-                st.markdown(
-                    """Finally, reflect on what you learned from this task. Focus on what you understood better about the problem, how AI supported or failed to support you, and what you would do differently in the next task."""
-                )
-                st.markdown(
-                    """> **Questions:**  
-    > What did I learn about the problem from this task?  
-    > What did I learn about using AI from this task?  
-    > What would I do differently in the next task?"""
-                )
-                st.text_area(
-                    "Write here:",
-                    key=f"{prefix}_step6_reflect",
-                    height=220,
-                    placeholder="Write your reflection here...",
-                )
-
+    # --------------------------
+    # Save button
+    # --------------------------
     col1, col2 = st.columns([1, 3])
     with col1:
         if st.button("Save task", key=f"{prefix}_save_btn", use_container_width=True):
@@ -1310,6 +1245,7 @@ def render_task(problem: str, task_no: int) -> None:
     with col2:
         if st.session_state.get(f"{prefix}_saved", False):
             st.success(f"{problem} - Task {task_no} saved.")
+
 
 def render_reflection(problem: str) -> None:
     p = key_prefix(problem)
@@ -1336,6 +1272,7 @@ You do not need to describe every detail. Instead, try to identify the most impo
         height=260,
         placeholder="Write your end-of-problem reflection here...",
     )
+
 
 def render_revisiting_hawker() -> None:
     p = key_prefix("Hawker Center")
