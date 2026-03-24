@@ -467,7 +467,7 @@ In this step, you should compute:
 - Average daily returns  
 - Average yearly returns  
 
-#### What you should do in this task
+**What you should do in this task**
 
 1. Start from the adjusted closing price data obtained
 
@@ -488,7 +488,7 @@ Print:
 - Average daily return  
 - Average yearly return  
 
-#### Suggested code structure
+**Suggested code structure**
 
 ```python
 import numpy as np
@@ -528,7 +528,7 @@ You may find it helpful to think about:
 - what the covariance matrix should look like
 - how these quantities may be used later in the model
 
-A simple workflow is:
+You can try to:
 
 - start from the return table
 - compute variance for each asset
@@ -557,7 +557,7 @@ You may find it helpful to think about:
 - what constraints are needed
 - how to organize the model clearly in code
 
-A simple workflow is:
+You can try to:
 
 - define portfolio weights as decision variables
 - write the objective function
