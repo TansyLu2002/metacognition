@@ -375,76 +375,151 @@ REVISIT_ITEMS = [
 TASK_HINTS = {
     "plan": """Hints: Possible planning stages
 
-Before you start solving the portfolio optimization problem, try to break the work into a few smaller tasks. This can help you organize your thinking and avoid jumping directly into code.
+Before you start solving the portfolio optimization problem, try to break the work into smaller and manageable steps. This helps you organize your thinking and avoid jumping directly into coding without understanding the workflow.
 
 A possible way to divide the work is:
 
-- Task 1: Understand the financial problem and the optimization goal
-- Task 2: Compute returns and prepare the main inputs
-- Task 3: Compute variance/covariance and decide how risk is represented
-- Task 4: Formulate and solve the optimization model in code
-- Task 5: Check, interpret, and present the final solution
+
+- Task 1: Collect and prepare stock price data  
+Download historical stock prices and organize them into a clean dataset.  
+Make sure the data is aligned by date and contains no obvious missing values.
+
+- Task 2: Compute returns and expected returns  
+Convert stock prices into daily returns.  
+Then compute average daily returns and yearly returns.  
+These values will later represent expected returns in the optimization model.
+
+- Task 3: Measure risk using variance and covariance  
+Calculate the variance of each stock and the covariance matrix.  
+This step defines how risk is represented in the portfolio optimization model.
+
+- Task 4: Formulate and solve the optimization model  
+Use expected returns and covariance matrix to build the portfolio optimization model.  
+Define decision variables, objective function, and constraints.  
+Solve the model using an optimization solver.
+
+- Task 5: Analyze and interpret the results  
+Examine the optimal portfolio weights.  
+Check whether the solution is diversified.  
+Interpret the trade-off between return and risk.  
+Present the results clearly.
 """,
-    1: """Hint for Task 1: Understand the Problem and the Financial Concepts
+    1: """Hint for Task 1: Pull the stock price data from Yahoo Finance
 
-Portfolio optimization is introduced as choosing a combination of assets to achieve high return with low risk, within the framework of Modern Portfolio Theory (mean-variance analysis). The notebook also introduces efficient frontier and Sharpe ratio as important ideas for understanding the trade-off between return and risk. 
+**Task focus:**  
+Use the Markowitz model for portfolio optimization. The first step is to collect historical stock price data from Yahoo Finance. In the original notebook, the data source is the **Adjusted Close price**, covering the period from **1 January 2010 to 31 December 2017**, for the following stocks:  
+`['HSBC', 'JPM', 'AAPL', 'WMT', 'AMZN', 'MSFT']`. :contentReference[oaicite:2]{index=2}
 
-You may find it helpful to think about:
+**What you should do in this task:**  
+1. Define the list of stock tickers and the date range.  
+2. Download the adjusted closing prices for all selected stocks.  
+3. Organize the result into a clean table where:
 
-- what a portfolio means in this problem
-- what return and risk means
-- why return and risk need to be considered together
-- what “optimal portfolio” means in this context
-- what efficient frontier helps us understand
-- why Sharpe ratio may be useful for comparing portfolio strategies
+- rows represent trading dates,
+- columns represent stocks,
+- values are adjusted closing prices.
 
-A useful goal for this task is to explain the problem in your own words before using AI.
+4. Check whether the downloaded dataset has missing values or inconsistent dates.
+5. Display the first few rows so that you can verify the data was loaded correctly.
+6. If requested, normalize the price series to compare the relative movement of different stocks over time. This helps visualize how the assets evolve on a common scale before any return calculation. :contentReference[oaicite:3]{index=3}
 
-At this stage, your job is mainly conceptual:
-- understand the meaning of the problem
-- identify the key quantities that will matter later
-- prepare yourself to move into data analysis and modeling in the next tasks
-
-Example code structure you may eventually work toward:
-
-```python
-# Example asset list
-assets = ["AAPL", "AMZN", "HSBC", "JPM", "MSFT", "WMT"]
-
-""",
-    2: """Hint for Task 2: Compute Returns and Prepare the Inputs
-
-At this stage, focus on preparing the main inputs for the optimization model.
-
-You may find it helpful to think about:
-
-- what data are given in the notebook
-- how return should be calculated from price data
-- what the return table should look like
-- what quantities will be needed in later tasks
-
-A simple workflow is:
-
-- load or inspect the price data
-- compute returns
-- remove missing values if needed
-- check the output before moving on
-
-Example code structure:
-
+**Suggested code structure:**
 ```python
 import pandas as pd
+import yfinance as yf
+import matplotlib.pyplot as plt
 
-prices = pd.read_csv("stock_prices.csv", index_col=0)
-returns = prices.pct_change().dropna()
+tickers = ['HSBC', 'JPM', 'AAPL', 'WMT', 'AMZN', 'MSFT']
+start_date = '2010-01-01'
+end_date = '2017-12-31'
 
+def load_price_data(tickers, start_date, end_date):
+    data = yf.download(tickers, start=start_date, end=end_date)['Adj Close']
+    return data
+
+prices = load_price_data(tickers, start_date, end_date)
+print(prices.head())
+print(prices.isna().sum())
+
+# optional: normalized price plot
+normalized_prices = prices / prices.iloc[0]
+normalized_prices.plot(figsize=(10, 6))
+plt.title('Normalized Stock Prices')
+plt.xlabel('Date')
+plt.ylabel('Normalized Price')
+plt.show()
+```
+You should pay attention to:
+
+- Make sure you are using Adj Close, not only Close.
+- Ensure all selected stocks are aligned on the same trading dates.
+- Keep the output clean and readable, because this table will be reused in later tasks.
+""",
+    2: """Hint for Task 2: Calculate daily returns and average returns
+
+**Task focus:**  
+After collecting the stock price data, the next step is to compute stock returns.  
+In portfolio optimization, expected return is a key input. Therefore, you need to convert price data into return data before building the optimization model.
+
+In this step, you should compute:
+
+- Daily returns  
+- Average daily returns  
+- Average yearly returns  
+
+### What you should do in this task
+
+1. Start from the adjusted closing price data obtained
+
+2. Compute daily returns  
+
+3. Remove missing values  
+After computing returns, the first row will contain NaN values.  
+Remove those rows before further analysis.
+
+4. Compute average daily return for each stock
+
+5. Convert daily return into yearly return  
+
+6. Display results clearly  
+Print:
+
+- First few rows of return table  
+- Average daily return  
+- Average yearly return  
+
+### Suggested code structure
+
+```python
+import numpy as np
+import pandas as pd
+
+def compute_log_returns(prices):
+    log_returns = np.log(prices / prices.shift(1))
+    return log_returns.dropna()
+
+returns = compute_log_returns(prices)
+
+# average daily return
+avg_daily_return = returns.mean()
+
+# average yearly return
+avg_yearly_return = avg_daily_return * 252
+
+print("Daily returns:")
 print(returns.head())
-print(returns.describe())
+
+print("\nAverage daily return:")
+print(avg_daily_return)
+
+print("\nAverage yearly return:")
+print(avg_yearly_return)
 
 """,
-    3: """Hint for Task 3: Compute Variance/Covariance and Represent Risk
+    3: """Hint for Task 3: Calculate variance, covariance, and correlation
 
-At this stage, focus on how risk should be represented in the portfolio optimization problem.
+After computing returns in Task 2, the next step is to measure risk.  
+In portfolio optimization, risk is not only determined by how much each stock fluctuates individually, but also by how different stocks move together.
 
 You may find it helpful to think about:
 
@@ -522,13 +597,6 @@ You may find it helpful to think about:
 - whether the weights look reasonable
 - what the final portfolio says about return and risk
 
-A simple workflow is:
-
-- extract the portfolio weights
-- check whether the weights sum to 1
-- compute portfolio return and portfolio risk
-- explain what the result means
-
 Example code structure:
 
 ```python
@@ -555,7 +623,6 @@ In your final interpretation, try to explain:
 
 """,
 }
-
 GENERIC_TASK_HINT = """
 
 At this stage, focus on keeping your work aligned with your own task plan and reasoning.
