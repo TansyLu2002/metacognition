@@ -467,7 +467,7 @@ In this step, you should compute:
 - Average daily returns  
 - Average yearly returns  
 
-### What you should do in this task
+#### What you should do in this task
 
 1. Start from the adjusted closing price data obtained
 
@@ -488,7 +488,7 @@ Print:
 - Average daily return  
 - Average yearly return  
 
-### Suggested code structure
+#### Suggested code structure
 
 ```python
 import numpy as np
